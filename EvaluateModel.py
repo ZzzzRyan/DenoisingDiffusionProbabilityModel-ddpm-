@@ -37,6 +37,27 @@ def save_real_images(split="test", save_dir="RealImages_Test"):
 
 
 # ==================== 2. 生成图片 ====================
+def get_latest_checkpoint(checkpoint_dir):
+    """获取目录下最新的checkpoint"""
+    if not os.path.exists(checkpoint_dir):
+        return None
+
+    files = [
+        f
+        for f in os.listdir(checkpoint_dir)
+        if f.startswith("ckpt_") and f.endswith("_.pt")
+    ]
+    if not files:
+        return None
+
+    try:
+        # 格式: ckpt_{epoch}_.pt
+        latest_file = max(files, key=lambda x: int(x.split("_")[1]))
+        return os.path.join(checkpoint_dir, latest_file)
+    except Exception:
+        return None
+
+
 def generate_images(
     mode="conditional",
     checkpoint_path=None,
@@ -51,11 +72,21 @@ def generate_images(
 
     # 默认路径
     if checkpoint_path is None:
-        checkpoint_path = (
-            "./CheckpointsCondition/ckpt_63_.pt"
+        ckpt_dir = (
+            "./CheckpointsCondition"
             if mode == "conditional"
-            else "./Checkpoints/ckpt_70_.pt"
+            else "./Checkpoints"
         )
+        latest_ckpt = get_latest_checkpoint(ckpt_dir)
+        if latest_ckpt:
+            checkpoint_path = latest_ckpt
+            print(f"Using latest checkpoint: {checkpoint_path}")
+        else:
+            checkpoint_path = (
+                "./CheckpointsCondition/ckpt_63_.pt"
+                if mode == "conditional"
+                else "./Checkpoints/ckpt_70_.pt"
+            )
     if save_dir is None:
         save_dir = (
             f"Generated_{mode}_w{w}"
