@@ -168,12 +168,21 @@ def _generate_conditional(
         dropout=config["dropout"],
     )
 
+    # 加载checkpoint
+    checkpoint = torch.load(checkpoint_path, map_location=device_obj)
+
     # 多GPU包装
     if use_multi_gpu:
         model = torch.nn.DataParallel(model)
-    model = model.to(device_obj)
+        model = model.to(device_obj)
+        # DataParallel模型需要给参数名添加 module. 前缀
+        # 但checkpoint是用 module.state_dict() 保存的，所以没有前缀
+        # 需要加载到 module 中
+        model.module.load_state_dict(checkpoint)
+    else:
+        model = model.to(device_obj)
+        model.load_state_dict(checkpoint)
 
-    model.load_state_dict(torch.load(checkpoint_path, map_location=device_obj))
     model.eval()
 
     sampler = GaussianDiffusionSampler(
@@ -283,12 +292,21 @@ def _generate_unconditional(
         dropout=config["dropout"],
     )
 
+    # 加载checkpoint
+    checkpoint = torch.load(checkpoint_path, map_location=device_obj)
+
     # 多GPU包装
     if use_multi_gpu:
         model = torch.nn.DataParallel(model)
-    model = model.to(device_obj)
+        model = model.to(device_obj)
+        # DataParallel模型需要给参数名添加 module. 前缀
+        # 但checkpoint是用 module.state_dict() 保存的，所以没有前缀
+        # 需要加载到 module 中
+        model.module.load_state_dict(checkpoint)
+    else:
+        model = model.to(device_obj)
+        model.load_state_dict(checkpoint)
 
-    model.load_state_dict(torch.load(checkpoint_path, map_location=device_obj))
     model.eval()
 
     sampler = GaussianDiffusionSampler(
