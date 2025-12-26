@@ -43,14 +43,14 @@ python Main.py
 
 ```bash
 # 完整评估：生成10000张图片，平衡各类别，计算IS/FID/KID
-python EvaluateModel.py --mode conditional --num_images 10000 --balanced
+python EvaluateModel.py --mode conditional --balanced
 ```
 
 ## 📊 常用命令
 
 ### 仅生成图片
 ```bash
-python EvaluateModel.py --only_generate --num_images 1000 --balanced
+python EvaluateModel.py --only_generate --balanced
 ```
 
 ### 仅计算指标
