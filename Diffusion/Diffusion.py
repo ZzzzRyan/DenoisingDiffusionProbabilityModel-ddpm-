@@ -1,9 +1,7 @@
-
+import numpy as np
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-
-import numpy as np
 
 
 def extract(v, t, x_shape):
@@ -24,26 +22,28 @@ class GaussianDiffusionTrainer(nn.Module):
         self.T = T
 
         self.register_buffer(
-            'betas', torch.linspace(beta_1, beta_T, T).double())
-        alphas = 1. - self.betas
+            "betas", torch.linspace(beta_1, beta_T, T).double()
+        )
+        alphas = 1.0 - self.betas
         alphas_bar = torch.cumprod(alphas, dim=0)
 
         # calculations for diffusion q(x_t | x_{t-1}) and others
+        self.register_buffer("sqrt_alphas_bar", torch.sqrt(alphas_bar))
         self.register_buffer(
-            'sqrt_alphas_bar', torch.sqrt(alphas_bar))
-        self.register_buffer(
-            'sqrt_one_minus_alphas_bar', torch.sqrt(1. - alphas_bar))
+            "sqrt_one_minus_alphas_bar", torch.sqrt(1.0 - alphas_bar)
+        )
 
     def forward(self, x_0):
         """
         Algorithm 1.
         """
-        t = torch.randint(self.T, size=(x_0.shape[0], ), device=x_0.device)
+        t = torch.randint(self.T, size=(x_0.shape[0],), device=x_0.device)
         noise = torch.randn_like(x_0)
         x_t = (
-            extract(self.sqrt_alphas_bar, t, x_0.shape) * x_0 +
-            extract(self.sqrt_one_minus_alphas_bar, t, x_0.shape) * noise)
-        loss = F.mse_loss(self.model(x_t, t), noise, reduction='none')
+            extract(self.sqrt_alphas_bar, t, x_0.shape) * x_0
+            + extract(self.sqrt_one_minus_alphas_bar, t, x_0.shape) * noise
+        )
+        loss = F.mse_loss(self.model(x_t, t), noise, reduction="none")
         return loss
 
 
@@ -54,21 +54,29 @@ class GaussianDiffusionSampler(nn.Module):
         self.model = model
         self.T = T
 
-        self.register_buffer('betas', torch.linspace(beta_1, beta_T, T).double())
-        alphas = 1. - self.betas
+        self.register_buffer(
+            "betas", torch.linspace(beta_1, beta_T, T).double()
+        )
+        alphas = 1.0 - self.betas
         alphas_bar = torch.cumprod(alphas, dim=0)
         alphas_bar_prev = F.pad(alphas_bar, [1, 0], value=1)[:T]
 
-        self.register_buffer('coeff1', torch.sqrt(1. / alphas))
-        self.register_buffer('coeff2', self.coeff1 * (1. - alphas) / torch.sqrt(1. - alphas_bar))
+        self.register_buffer("coeff1", torch.sqrt(1.0 / alphas))
+        self.register_buffer(
+            "coeff2",
+            self.coeff1 * (1.0 - alphas) / torch.sqrt(1.0 - alphas_bar),
+        )
 
-        self.register_buffer('posterior_var', self.betas * (1. - alphas_bar_prev) / (1. - alphas_bar))
+        self.register_buffer(
+            "posterior_var",
+            self.betas * (1.0 - alphas_bar_prev) / (1.0 - alphas_bar),
+        )
 
     def predict_xt_prev_mean_from_eps(self, x_t, t, eps):
         assert x_t.shape == eps.shape
         return (
-            extract(self.coeff1, t, x_t.shape) * x_t -
-            extract(self.coeff2, t, x_t.shape) * eps
+            extract(self.coeff1, t, x_t.shape) * x_t
+            - extract(self.coeff2, t, x_t.shape) * eps
         )
 
     def p_mean_variance(self, x_t, t):
@@ -87,9 +95,16 @@ class GaussianDiffusionSampler(nn.Module):
         """
         x_t = x_T
         for time_step in reversed(range(self.T)):
-            print(time_step)
-            t = x_t.new_ones([x_T.shape[0], ], dtype=torch.long) * time_step
-            mean, var= self.p_mean_variance(x_t=x_t, t=t)
+            t = (
+                x_t.new_ones(
+                    [
+                        x_T.shape[0],
+                    ],
+                    dtype=torch.long,
+                )
+                * time_step
+            )
+            mean, var = self.p_mean_variance(x_t=x_t, t=t)
             # no noise when t == 0
             if time_step > 0:
                 noise = torch.randn_like(x_t)
@@ -98,6 +113,4 @@ class GaussianDiffusionSampler(nn.Module):
             x_t = mean + torch.sqrt(var) * noise
             assert torch.isnan(x_t).int().sum() == 0, "nan in tensor."
         x_0 = x_t
-        return torch.clip(x_0, -1, 1)   
-
-
+        return torch.clip(x_0, -1, 1)
