@@ -10,48 +10,43 @@
 - ✅ **简洁易用**：代码结构清晰，提供一键评估脚本
 - ✅ **实验报告友好**：自动生成评估报告和指标文件
 
-## 🚀 快速开始（三步完成）
+## 🚀 快速开始
 
-### 1. 安装依赖
+### 1. 环境配置
+
+#### 方式一：使用 uv (推荐)
 ```bash
-uv add torch torchvision tqdm numpy torch-fidelity pillow
+uv add torch torchvision tqdm numpy torch-fidelity
+```
+
+#### 方式二：使用 Conda
+```bash
+conda create -n ddpm python=3.12
+conda activate ddpm
+conda install pytorch torchvision pytorch-cuda=12.8 -c pytorch -c nvidia
+pip install tqdm numpy torch-fidelity
 ```
 
 ### 2. 训练模型
+
 ```bash
-python MainCondition.py  # 条件生成（推荐）
+# 条件生成模型（推荐）
+python MainCondition.py
+
+# 或无条件生成模型
+python Main.py
 ```
 
-### 3. 评估模型（一键完成所有评估）
+### 3. 评估模型
+
+使用 `EvaluateModel.py` 一键完成生成、计算指标和保存报告。
+
 ```bash
+# 完整评估：生成10000张图片，平衡各类别，计算IS/FID/KID
 python EvaluateModel.py --mode conditional --num_images 10000 --balanced
 ```
 
-就这么简单！评估脚本会自动：
-1. 保存 CIFAR-10 真实图片
-2. 生成指定数量的测试图片
-3. 计算 IS、FID、KID 指标
-4. 生成评估报告（JSON + TXT）
-
-## 📊 评估指标说明
-
-- **IS (Inception Score)**: 越高越好，CIFAR-10真实数据约11-12
-- **FID (Frechet Inception Distance)**: 越低越好，<10优秀，<30良好
-- **KID (Kernel Inception Distance)**: 越低越好，接近0最佳
-
-## 📁 核心文件
-
-```
-├── MainCondition.py            # 条件模型训练（推荐）
-├── Main.py                     # 无条件模型训练
-├── EvaluateModel.py            # 评估工具（包含所有评估功能）
-├── test_environment.py         # 环境测试
-├── QUICKSTART.md               # 快速上手指南
-├── Diffusion/                  # 无条件扩散模型
-└── DiffusionFreeGuidence/      # 条件扩散模型
-```
-
-## 💡 更多用法
+## 📊 常用命令
 
 ### 仅生成图片
 ```bash
@@ -60,45 +55,39 @@ python EvaluateModel.py --only_generate --num_images 1000 --balanced
 
 ### 仅计算指标
 ```bash
+# 指定生成的图片目录进行计算
 python EvaluateModel.py --only_metrics Generated_conditional_w1.8
 ```
 
-### 对比不同Guidance权重
+### 对比不同 Guidance 权重
 ```bash
 python EvaluateModel.py --w 1.8 --num_images 5000
 python EvaluateModel.py --w 3.0 --num_images 5000
 ```
 
-## 📖 详细文档
+## 🎯 参数说明
 
-- **[QUICKSTART.md](QUICKSTART.md)**: 快速上手指南
-- **[GUIDE.md](GUIDE.md)**: 完整使用说明和实验报告建议
-- **[CHECKLIST.md](CHECKLIST.md)**: 实验任务完成清单
+| 参数 | 说明 | 默认值 |
+|------|------|--------|
+| `--mode` | 模式：conditional/unconditional | conditional |
+| `--checkpoint` | 模型权重路径 | 自动选择最新 |
+| `--num_images` | 生成图片数量 | 10000 |
+| `--w` | Guidance权重 (条件模型) | 1.8 |
+| `--balanced` | 平衡生成各类别 | False |
 
-## 🎯 适用场景
+## 📁 核心文件结构
 
-- 机器学习课程实验（彩色图像生成任务）
-- DDPM 原理学习和实践
-- 生成模型性能评估研究
+```
+├── MainCondition.py            # 条件模型训练（推荐）
+├── Main.py                     # 无条件模型训练
+├── EvaluateModel.py            # 评估工具（包含所有评估功能）
+├── Diffusion/                  # 无条件扩散模型实现
+├── DiffusionFreeGuidence/      # 条件扩散模型实现
+├── CheckpointsCondition/       # 模型权重保存目录
+└── Generated_conditional_*/    # 生成图片保存目录
+```
 
 ## 📚 参考文献
 
 - **DDPM**: Denoising Diffusion Probabilistic Models (NeurIPS 2020)
 - **Classifier-Free Guidance**: Classifier-Free Diffusion Guidance (NeurIPS 2021)
-- **Blog**: [Lil'Log - What are Diffusion Models?](https://lilianweng.github.io/posts/2021-07-11-diffusion-models/)
-
-## 🖼️ 生成样例
-
-**训练方式:**
-* 1. 运行 `Main.py` 训练无条件 UNet
-* 2. 运行 `MainCondition.py` 训练条件 UNet（支持 Classifier-Free Guidance）
-
-Some generated images are showed below:
-
-* 1. DDPM without guidence:
-
-![Generated Images without condition](https://github.com/zoubohao/DenoisingDiffusionProbabilityModel-ddpm-/blob/main/SampledImgs/SampledNoGuidenceImgs.png)
-
-* 2. DDPM + Classifier free guidence:
-
-![Generated Images with condition](https://github.com/zoubohao/DenoisingDiffusionProbabilityModel-ddpm-/blob/main/SampledImgs/SampledGuidenceImgs.png)
