@@ -128,5 +128,8 @@ dmypy.json
 # data
 CIFAR10/
 Checkpoints*/
+
+# outputs
+Outputs/
 RealImages_Test/
 Generated*/
