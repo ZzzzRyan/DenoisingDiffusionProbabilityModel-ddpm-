@@ -8,9 +8,43 @@
 - ✅ **条件生成**：使用 Classifier-Free Guidance 按类别生成图像
 - ✅ **完整评估**：支持 IS、FID、KID 等评估指标，一个文件搞定
 - ✅ **简洁易用**：代码结构清晰，提供一键评估脚本
-- ✅ **实验报告友好**：自动生成评估报告和指标文件
 
-## 🚀 快速开始
+我服务器不同批次跑的评估结果都放在 `Outputs/Evalutation` 里了，如果电脑跑不动直接用里面的评估结果图。
+
+## 📊 评估结果
+
+### 数据结果
+
+```
+评估结果:
+============================================================
+inception_score_mean          : 9.0742
+inception_score_std           : 0.2055
+frechet_inception_distance    : 17.9150
+kernel_inception_distance_mean: 0.0046
+kernel_inception_distance_std : 0.0006
+============================================================
+
+指标说明:
+  IS  (Inception Score)       : 越高越好 (真实数据约11-12)
+  FID (Frechet Inception Dist): 越低越好 (<10优秀, <30良好)
+  KID (Kernel Inception Dist) : 越低越好 (接近0)
+============================================================
+```
+
+### 指标可视化
+
+![](./Outputs/Evaluation/metrics_20251228_033350.png)
+
+### loss 曲线
+
+![](./Outputs/Evaluation/training_20251228_033350.png)
+
+### 生成样例
+
+![](./Outputs/Evaluation/samples_20251228_033350.png)
+
+## 🚀 如何使用
 
 ### 1. 环境配置
 
@@ -46,7 +80,7 @@ python Main.py
 python EvaluateModel.py --mode conditional --balanced
 ```
 
-## 📊 常用命令
+## 🔧 常用命令
 
 ### 仅生成图片
 ```bash
@@ -65,13 +99,14 @@ python EvaluateModel.py --w 1.8 --num_images 5000
 python EvaluateModel.py --w 3.0 --num_images 5000
 ```
 
-## 🎯 参数说明
+## 🎯 EvaluateModel.py 参数说明
 
 | 参数 | 说明 | 默认值 |
 |------|------|--------|
 | `--mode` | 模式：conditional/unconditional | conditional |
 | `--checkpoint` | 模型权重路径 | 自动选择最新 |
 | `--num_images` | 生成图片数量 | 10000 |
+| `--batch_size` | 批量大小（显存大就调大点） | 100 |
 | `--w` | Guidance权重 (条件模型) | 1.8 |
 | `--balanced` | 平衡生成各类别 | False |
 
@@ -81,10 +116,11 @@ python EvaluateModel.py --w 3.0 --num_images 5000
 ├── MainCondition.py            # 条件模型训练（推荐）
 ├── Main.py                     # 无条件模型训练
 ├── EvaluateModel.py            # 评估工具（包含所有评估功能）
-├── Diffusion/                  # 无条件扩散模型实现
-├── DiffusionFreeGuidence/      # 条件扩散模型实现
-├── CheckpointsCondition/       # 模型权重保存目录
-└── Generated_conditional_*/    # 生成图片保存目录
+├── Diffusion/                  # 无条件扩散模型实现代码
+├── DiffusionFreeGuidence/      # 条件扩散模型实现代码
+├── Checkpoints/                # 无条件扩散模型权重保存目录
+├── CheckpointsCondition/       # 条件扩散模型权重保存目录
+└── Outputs/                    # 生成结果保存目录
 ```
 
 ## 📚 参考文献
