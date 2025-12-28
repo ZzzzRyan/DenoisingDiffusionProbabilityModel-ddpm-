@@ -1,0 +1,15 @@
+{
+    "timestamp": "20251227_235739",
+    "mode": "unconditional",
+    "checkpoint": null,
+    "num_images": 10000,
+    "w": null,
+    "balanced": null,
+    "metrics": {
+        "inception_score_mean": 7.841798125487729,
+        "inception_score_std": 0.21165673281058417,
+        "frechet_inception_distance": 18.693454833994906,
+        "kernel_inception_distance_mean": 0.009514110088348389,
+        "kernel_inception_distance_std": 0.0009304440432631168
+    }
+}
