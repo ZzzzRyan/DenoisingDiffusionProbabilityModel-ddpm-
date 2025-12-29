@@ -57,8 +57,8 @@ uv add torch torchvision tqdm numpy torch-fidelity
 ```bash
 conda create -n ddpm python=3.12
 conda activate ddpm
-conda install pytorch torchvision pytorch-cuda=12.8 -c pytorch -c nvidia
-pip install tqdm numpy torch-fidelity
+# 因为现在pytorch不维护conda源了，所以pytorch推荐用pip安装
+pip install torch torchvision tqdm numpy torch-fidelity
 ```
 
 ### 2. 训练模型
