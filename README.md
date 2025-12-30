@@ -50,7 +50,7 @@ kernel_inception_distance_std : 0.0006
 
 #### 方式一：使用 uv (推荐)
 ```bash
-uv add torch torchvision tqdm numpy torch-fidelity
+uv sync
 ```
 
 #### 方式二：使用 Conda
